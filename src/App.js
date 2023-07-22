@@ -1,8 +1,12 @@
-import './App.css';
+import React from 'react';
+import ProductList from './components/ProductList';
+import './assets/App.css';
 
 function App() {
   return (
-    <h1>gg</h1>
+    <div className='App'>
+      <ProductList />
+    </div>
   );
 }
 
