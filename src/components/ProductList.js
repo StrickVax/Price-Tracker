@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function ProductList() {
     const [products, setProducts] = useState([
@@ -14,6 +15,7 @@ function ProductList() {
                     <h2>{product.name}</h2>
                     <p>{product.price}</p>
                     <p>{product.store}</p>
+                    <Link to={`/product/${product.id}`}>AMOG</Link>
                 </div>
             ))}
         </div>
