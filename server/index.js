@@ -24,7 +24,28 @@ Product.init({
 sequelize.sync();
 
 app.get('/', (req, res) => {
-    res.send('Hello, World!');
+    res.send('Welcome to my Price Tracker API!');
+});
+
+app.get('/products', async (req, res) => {
+    try {
+        const products = await Product.findAll();
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+});
+
+app.use(express.json());
+
+
+app.post('/products', async (req, res) => {
+    try {
+        const product = await Product.create(req.body);
+        res.status(201).json(product);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.listen(port, () => {
