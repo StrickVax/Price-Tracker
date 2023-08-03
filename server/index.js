@@ -39,7 +39,7 @@ ProductStore.init({}, {
 Product.belongsToMany(Store, { through: ProductStore });
 Store.belongsToMany(Product, { through: ProductStore });
 
-sequelize.sync({ force: true });
+sequelize.sync();
 
 app.get('/', (req, res) => {
     res.send('Welcome to my Price Tracker API!');
