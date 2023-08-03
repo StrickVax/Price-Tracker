@@ -16,7 +16,8 @@ function ProductForm() {
             return;
         }
 
-        const product = { name, price: parseInt(price, 10), stores: JSON.stringify(stores) };
+        const productData = { name, price: parseInt(price, 10) };
+        const body = JSON.stringify({ product: productData, stores }); // both product and stores
 
         try {
             const response = await fetch("http://localhost:5000/products", {
@@ -24,7 +25,7 @@ function ProductForm() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(product),
+                body: body,
             });
 
             const data = await response.json();
@@ -48,6 +49,7 @@ function ProductForm() {
         setStores(selectedStores);
     };
 
+    // Frontend display
     return (
         <form onSubmit={handleSubmit} className="product-form">
             <label>

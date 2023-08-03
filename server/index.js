@@ -14,17 +14,32 @@ const sequelize = new Sequelize({
 
 // Define a "Product" model
 class Product extends Model { }
-
 Product.init({
     name: DataTypes.STRING,
     price: DataTypes.INTEGER,
-    store: DataTypes.STRING
 }, {
     sequelize,
     modelName: 'Product'
 });
 
-sequelize.sync();
+class Store extends Model { }
+Store.init({
+    name: DataTypes.STRING,
+}, {
+    sequelize,
+    modelName: 'Store'
+});
+
+class ProductStore extends Model { }
+ProductStore.init({}, {
+    sequelize,
+    modelName: 'ProductStore'
+});
+
+Product.belongsToMany(Store, { through: ProductStore });
+Store.belongsToMany(Product, { through: ProductStore });
+
+sequelize.sync({ force: true });
 
 app.get('/', (req, res) => {
     res.send('Welcome to my Price Tracker API!');
@@ -34,7 +49,14 @@ app.use(express.json());
 
 app.get('/products', async (req, res) => {
     try {
-        const products = await Product.findAll();
+        const products = await Product.findAll({
+            include: {
+                model: Store,
+                through: {
+                    attributes: [] // Exclude the join table from the result
+                }
+            }
+        });
         res.json(products);
     } catch (err) {
         res.status(500).json({ error: err.message })
@@ -42,11 +64,20 @@ app.get('/products', async (req, res) => {
 });
 
 
+
 app.post('/products', async (req, res) => {
+    console.log(req.body);
+    const transaction = await sequelize.transaction();
     try {
-        const product = await Product.create(req.body);
+        const product = await Product.create(req.body.product, { transaction });
+        const stores = req.body.stores.map(storeName => ({ name: storeName }));
+        const storeRecords = await Store.bulkCreate(stores, { transaction, ignoreDuplicates: true });
+        await product.addStores(storeRecords, { transaction });
+
+        await transaction.commit();
         res.status(201).json(product);
     } catch (err) {
+        await transaction.rollback();
         res.status(500).json({ error: err.message });
     }
 });
