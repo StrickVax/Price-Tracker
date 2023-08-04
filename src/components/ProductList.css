@@ -3,11 +3,12 @@
 h1 {
     text-align: center;
     color: #333;
+    margin-bottom: 20px;
 }
 
 button {
     display: block;
-    margin: 10px auto;
+    margin: 15px auto;
     padding: 10px 20px;
     background-color: #4caf50;
     color: white;
@@ -15,36 +16,51 @@ button {
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
     background-color: #45a049;
 }
 
-div {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+.store-section {
+    margin: 20px auto;
+    width: 90%;
 }
 
 h2 {
     text-align: center;
     color: #555;
+    margin-bottom: 15px;
+}
+
+.products-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.product-item {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    width: calc(20% - 20px);
+    text-align: center;
+    background-color: #f9f9f9;
+    transition: transform 0.3s;
+}
+
+.product-item:hover {
+    transform: scale(1.03);
 }
 
 img {
     width: 100px;
     height: 100px;
     object-fit: cover;
-}
-
-.product-item {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    margin: 10px;
-    padding: 20px;
-    border-radius: 5px;
-    width: 200px;
-    text-align: center;
+    margin-bottom: 10px;
 }
 
 .product-item h3 {
