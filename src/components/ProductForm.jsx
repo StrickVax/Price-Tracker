@@ -1,12 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function ProductForm() {
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
     const [stores, setStores] = useState([]);
-    const [message, setMessage] = useState("");
-
     const storeOptions = ["Costco", "WinCo", "Walmart", "El Super"];
+    const [message, setMessage] = useState("");
+    const [items, setItems] = useState([]);
+    const [suggestions, setSuggestions] = useState([]);
+
+    // Fetch products from backend when the component mounts
+    useEffect(() => {
+        fetch('http://localhost:5000/products')
+            .then((response) => response.json())
+            .then((data) => setItems(data))
+            .catch((error) => console.error('An error occurred:', error));
+    }, []);
+
+    // Update suggestions when name changes
+    useEffect(() => {
+        if (name.length > 0) {
+            const matchingItems = items.filter((item) =>
+                item.name.toLowerCase().startsWith(name.toLowerCase())
+            );
+            setSuggestions(matchingItems);
+        } else {
+            setSuggestions([]); // Clear suggestions when there's no input
+        }
+    }, [name, items]);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,7 +76,22 @@ function ProductForm() {
         <form onSubmit={handleSubmit} className="product-form">
             <label>
                 Name:
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+                <div>
+                    {suggestions.map((suggestion) => (
+                        <div
+                            key={suggestion.id}
+                            onClick={() => setName(suggestion.name)}
+                        >
+                            {suggestion.name}
+                        </div>
+                    ))}
+                </div>
             </label>
             <label>
                 Price:
