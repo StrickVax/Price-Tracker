@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import './ProductList.css';
 
 function ProductList() {
     const [products, setProducts] = useState([]);
@@ -37,7 +38,7 @@ function ProductList() {
                 <div key={storeName}>
                     <h2>{storeName}</h2>
                     {groupedProducts[storeName].map((product) => (
-                        <div key={product.id}>
+                        <div key={product.id} className='product-item'>
                             <img src="placeholder-image.png" alt={product.name} />
                             <h3>{product.name}</h3>
                             <p>Price: {product.price.toFixed(2)}</p>
@@ -46,7 +47,6 @@ function ProductList() {
                     ))}
                 </div>
             ))}
-            <p>hey</p>
         </div>
     );
 }
