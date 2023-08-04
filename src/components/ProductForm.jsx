@@ -1,12 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function ProductForm() {
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
     const [stores, setStores] = useState([]);
-    const [message, setMessage] = useState("");
-
     const storeOptions = ["Costco", "WinCo", "Walmart", "El Super"];
+    const [message, setMessage] = useState("");
+    const [items, setItems] = useState([]);
+    const [suggestions, setSuggestions] = useState([]);
+
+    // Fetch products from backend when the component mounts
+    useEffect(() => {
+        fetch('http://localhost:5000/products')
+            .then((response) => response.json())
+            .then((data) => setItems(data))
+            .catch((error) => console.error('An error occurred:', error));
+    }, []);
+
+
+    const handleNameChange = (e) => {
+        const value = e.target.value;
+        setName(value);
+        const newSuggestions = items.filter((item) => item.name.startsWith(value));
+        setSuggestions(newSuggestions);
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+        setName(suggestion.name);
+        setSuggestions([]);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,7 +76,19 @@ function ProductForm() {
         <form onSubmit={handleSubmit} className="product-form">
             <label>
                 Name:
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+                <input
+                    type="text"
+                    value={name}
+                    onChange={handleNameChange}
+                    required
+                />
+                <div className="suggestions">
+                    {suggestions.map((suggestion, index) => (
+                        <div key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                            {suggestion.name}
+                        </div>
+                    ))}
+                </div>
             </label>
             <label>
                 Price:
