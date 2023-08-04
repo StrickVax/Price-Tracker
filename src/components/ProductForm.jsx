@@ -16,7 +16,7 @@ function ProductForm() {
             return;
         }
 
-        const productData = { name, price: parseInt(price, 10) };
+        const productData = { name, price: parseFloat(price, 10) };
         const body = JSON.stringify({ product: productData, stores }); // both product and stores
 
         try {

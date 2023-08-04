@@ -16,7 +16,7 @@ const sequelize = new Sequelize({
 class Product extends Model { }
 Product.init({
     name: DataTypes.STRING,
-    price: DataTypes.INTEGER,
+    price: DataTypes.FLOAT,
 }, {
     sequelize,
     modelName: 'Product'
