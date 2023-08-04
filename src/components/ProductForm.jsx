@@ -17,18 +17,18 @@ function ProductForm() {
             .catch((error) => console.error('An error occurred:', error));
     }, []);
 
+    // Update suggestions when name changes
+    useEffect(() => {
+        if (name.length > 0) {
+            const matchingItems = items.filter((item) =>
+                item.name.toLowerCase().startsWith(name.toLowerCase())
+            );
+            setSuggestions(matchingItems);
+        } else {
+            setSuggestions([]); // Clear suggestions when there's no input
+        }
+    }, [name, items]);
 
-    const handleNameChange = (e) => {
-        const value = e.target.value;
-        setName(value);
-        const newSuggestions = items.filter((item) => item.name.startsWith(value));
-        setSuggestions(newSuggestions);
-    };
-
-    const handleSuggestionClick = (suggestion) => {
-        setName(suggestion.name);
-        setSuggestions([]);
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -79,12 +79,15 @@ function ProductForm() {
                 <input
                     type="text"
                     value={name}
-                    onChange={handleNameChange}
+                    onChange={(e) => setName(e.target.value)}
                     required
                 />
-                <div className="suggestions">
-                    {suggestions.map((suggestion, index) => (
-                        <div key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                <div>
+                    {suggestions.map((suggestion) => (
+                        <div
+                            key={suggestion.id}
+                            onClick={() => setName(suggestion.name)}
+                        >
                             {suggestion.name}
                         </div>
                     ))}
