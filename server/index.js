@@ -1,6 +1,8 @@
 const cors = require('cors');
 const express = require('express');
 const { Sequelize, DataTypes, Model } = require('sequelize');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 app.use(cors());
@@ -12,11 +14,25 @@ const sequelize = new Sequelize({
     storage: './database.sqlite',
 });
 
+// Component that lets users upload photos
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
+
+
 // Define a "Product" model
 class Product extends Model { }
 Product.init({
     name: DataTypes.STRING,
     price: DataTypes.FLOAT,
+    imagePath: DataTypes.STRING,
 }, {
     sequelize,
     modelName: 'Product'
@@ -47,6 +63,10 @@ app.get('/', (req, res) => {
 
 app.use(express.json());
 
+// lets images be access with urls
+app.use('/uploads', express.static('uploads'));
+
+// Gets the data from the database
 app.get('/products', async (req, res) => {
     try {
         const products = await Product.findAll({
@@ -59,18 +79,33 @@ app.get('/products', async (req, res) => {
         });
         res.json(products);
     } catch (err) {
-        res.status(500).json({ error: err.message })
+        console.error(err); // Log the entire error object
+        res.status(500).json({ error: err.message });
+
     }
 });
 
-
-
-app.post('/products', async (req, res) => {
-    console.log(req.body);
+// Sends the data to the frontend
+app.post('/products', upload.single('image'), async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
-        const product = await Product.create(req.body.product, { transaction });
-        const stores = req.body.stores.map(storeName => ({ name: storeName }));
+        console.log('req.body:', req.body);
+        console.log('req.file:', req.file);
+        const productData = JSON.parse(req.body.product);
+        console.log('Parsed product data:', productData);
+
+        const storesData = JSON.parse(req.body.stores);
+        console.log('req.body.stores:', req.body.stores);
+        console.log('Parsed stores data:', storesData);
+
+
+        if (req.file) {
+            productData.imagePath = req.file.path; // Add the image path if the file exists
+        }
+
+        const product = await Product.create(productData, { transaction });
+        const stores = storesData.map(storeName => ({ name: storeName }));
+        console.log('Mapped stores:', stores);
         const storeRecords = await Store.bulkCreate(stores, { transaction, ignoreDuplicates: true });
         await product.addStores(storeRecords, { transaction });
 
@@ -78,8 +113,12 @@ app.post('/products', async (req, res) => {
         res.status(201).json(product);
     } catch (err) {
         await transaction.rollback();
+        console.error(err); // Log the entire error object
         res.status(500).json({ error: err.message });
+
     }
+    console.log("Request body:", req.body);
+
 });
 
 app.listen(port, () => {

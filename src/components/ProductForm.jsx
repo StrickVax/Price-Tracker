@@ -8,6 +8,7 @@ function ProductForm() {
     const [message, setMessage] = useState("");
     const [items, setItems] = useState([]);
     const [suggestions, setSuggestions] = useState([]);
+    const [file, setFile] = useState(null);
 
     // Fetch products from backend when the component mounts
     useEffect(() => {
@@ -29,7 +30,7 @@ function ProductForm() {
         }
     }, [name, items]);
 
-
+    // Sends data to the backend
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -38,19 +39,32 @@ function ProductForm() {
             return;
         }
 
-        const productData = { name, price: parseFloat(price, 10) };
-        const body = JSON.stringify({ product: productData, stores }); // both product and stores
+        const productData = {
+            name: name,
+            price: parseFloat(price), // Convert the price to a number
+        };
+        
+
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('product', JSON.stringify(productData));
+        formData.append('stores', JSON.stringify(stores));
+        if (file) {
+            formData.append('image', file);
+        }
+
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
 
         try {
             const response = await fetch("http://localhost:5000/products", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: body,
+                body: formData, // Use FormData object here
             });
-
+            console.log("Server response:", response);
             const data = await response.json();
+            console.log("Server data:", data);
 
             if (response.ok) {
                 // Clear the form
@@ -59,6 +73,11 @@ function ProductForm() {
                 setMessage("Product added successfully!");
             } else {
                 // Handle error
+                console.log("Name:", name);
+                console.log("Price:", price);
+                console.log("Stores:", stores);
+                console.log("File:", file);
+
                 console.error(data.error);
             }
         } catch (err) {
@@ -75,6 +94,7 @@ function ProductForm() {
     return (
         <form onSubmit={handleSubmit} className="product-form">
             <label>
+
                 Name:
                 <input
                     type="text"
@@ -83,7 +103,7 @@ function ProductForm() {
                     required
                 />
                 <div>
-                    {suggestions.map((suggestion) => (
+                    {Array.isArray(suggestions) && suggestions.map((suggestion) => (
                         <div
                             key={suggestion.id}
                             onClick={() => setName(suggestion.name)}
@@ -104,6 +124,10 @@ function ProductForm() {
                         <option key={store} value={store}>{store}</option>
                     ))}
                 </select>
+            </label>
+            <label>
+                Image:
+                <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFile(e.target.files[0])} />
             </label>
             <button type="submit">Add Product</button>
             {message && <p>{message}</p>}
