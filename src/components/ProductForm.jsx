@@ -9,6 +9,7 @@ function ProductForm() {
     const [items, setItems] = useState([]);
     const [suggestions, setSuggestions] = useState([]);
     const [file, setFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     // Fetch products from backend when the component mounts
     useEffect(() => {
@@ -43,7 +44,7 @@ function ProductForm() {
             name: name,
             price: parseFloat(price), // Convert the price to a number
         };
-        
+
 
         // Create FormData object
         const formData = new FormData();
@@ -84,6 +85,23 @@ function ProductForm() {
             console.error(err.message);
         }
     };
+
+    // Updates image preview
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            setImagePreview(reader.result);
+            setFile(file); // Update the file state here
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            setImagePreview(null)  // Clear the preview if the file input is cleared
+        }
+    }
 
     const handleStoreChange = (e) => {
         const selectedStores = Array.from(e.target.selectedOptions, option => option.value);
@@ -127,7 +145,10 @@ function ProductForm() {
             </label>
             <label>
                 Image:
-                <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFile(e.target.files[0])} />
+                <input type="file" accept="image/png, image/jpeg" onChange={handleImageChange} />
+                {imagePreview && (
+                    <img src={imagePreview} alt="Image Preview" style={{ width: '100px' }} />
+                )}
             </label>
             <button type="submit">Add Product</button>
             {message && <p>{message}</p>}
