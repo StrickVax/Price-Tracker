@@ -1,16 +1,22 @@
 /* ProductList.css */
 
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8ecec;
+    color: #333;
+}
+
 h1 {
     text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+    color: #a22;
+    margin: 20px 0;
 }
 
 button {
     display: block;
     margin: 15px auto;
     padding: 10px 20px;
-    background-color: #4caf50;
+    background-color: #e74c3c; /* Vermilion */
     color: white;
     border: none;
     border-radius: 5px;
@@ -20,17 +26,22 @@ button {
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #c0392b; /* Darker Vermilion */
 }
 
 .store-section {
     margin: 20px auto;
-    width: 90%;
+    max-width: 1100px;
+}
+
+.store-section:nth-child(odd) {
+    background-color: rgb(200, 189, 189);
 }
 
 h2 {
     text-align: center;
     color: #555;
+    padding: 10px;
     margin-bottom: 15px;
 }
 
@@ -46,14 +57,26 @@ h2 {
     margin: 10px;
     padding: 20px;
     border-radius: 5px;
-    width: calc(20% - 20px);
+    flex-basis: calc(20% - 20px);
     text-align: center;
-    background-color: #f9f9f9;
+    background-color: white;
     transition: transform 0.3s;
 }
 
 .product-item:hover {
     transform: scale(1.03);
+}
+
+@media (max-width: 768px) {
+    .product-item {
+        flex-basis: calc(50% - 20px);
+    }
+}
+
+@media (max-width: 480px) {
+    .product-item {
+        flex-basis: calc(100% - 20px);
+    }
 }
 
 img {
@@ -72,7 +95,7 @@ img {
 }
 
 a {
-    color: #007bff;
+    color: #e74c3c; /* Vermilion */
     text-decoration: none;
 }
 
