@@ -47,10 +47,13 @@ Store.init({
 });
 
 class ProductStore extends Model { }
-ProductStore.init({}, {
+ProductStore.init({
+    price: DataTypes.FLOAT
+}, {
     sequelize,
     modelName: 'ProductStore'
 });
+
 
 Product.belongsToMany(Store, { through: ProductStore });
 Store.belongsToMany(Product, { through: ProductStore });
@@ -86,57 +89,58 @@ app.get('/products', async (req, res) => {
 });
 
 // Gets a single product from the database
-app.get('/product/:id', async (req, res) => {
+app.get('/stores/:storeId/products/:productId', async (req, res) => {
     try {
-        const id = req.params.id; // Get the id from the request parameters
-        const product = await Product.findOne({
-            where: {
-                id: id
-            },
-            include: {
+        const { storeId, productId } = req.params;
+        const product = await Product.findByPk(productId, {
+            include: [{
                 model: Store,
+                where: { id: storeId },
                 through: {
-                    attributes: [] // Exclude the join table from the result
+                    attributes: ['price'] // Include the price from the join table
                 }
-            }
+            }]
         });
 
-        if (product) {
-            res.json(product);
-        } else {
-            // If no product was found, send a 404 response
-            res.status(404).json({ message: 'Product not found' });
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found in store' });
         }
+
+        res.json(product);
     } catch (err) {
-        console.error(err); // Log the entire error object
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
+
 
 
 // Sends the data to the frontend
 app.post('/products', upload.single('image'), async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
-        console.log('req.body:', req.body);
-        console.log('req.file:', req.file);
         const productData = JSON.parse(req.body.product);
-        console.log('Parsed product data:', productData);
-
         const storesData = JSON.parse(req.body.stores);
-        console.log('req.body.stores:', req.body.stores);
-        console.log('Parsed stores data:', storesData);
 
 
         if (req.file) {
             productData.imagePath = req.file.path; // Add the image path if the file exists
         }
 
-        const product = await Product.create(productData, { transaction });
+        let product = await Product.findOne({ where: { name: productData.name } });
+        if (!product) {
+            // If the product does not exist, create it
+            product = await Product.create(productData, { transaction });
+        }
+        // If the product exists, the existing product is used
+
         const stores = storesData.map(storeName => ({ name: storeName }));
-        console.log('Mapped stores:', stores);
         const storeRecords = await Store.bulkCreate(stores, { transaction, ignoreDuplicates: true });
-        await product.addStores(storeRecords, { transaction });
+
+        // Add the stores to the product and specify the price
+        for (const storeRecord of storeRecords) {
+            await product.addStore(storeRecord, { through: { price: productData.price }, transaction });
+        }
 
         await transaction.commit();
         res.status(201).json(product);
@@ -149,6 +153,28 @@ app.post('/products', upload.single('image'), async (req, res) => {
     console.log("Request body:", req.body);
 
 });
+
+// If the product already exists, and you want to update the price
+app.put('/stores/:storeId/products/:productId', async (req, res) => {
+    try {
+        const { storeId, productId } = req.params;
+        const { price } = req.body;
+        const productStore = await ProductStore.findOne({ where: { StoreId: storeId, ProductId: productId } });
+
+        if (!productStore) {
+            return res.status(404).json({ message: 'Product not found in store' });
+        }
+
+        productStore.price = price;
+        await productStore.save();
+
+        res.json(productStore);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
