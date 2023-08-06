@@ -16,7 +16,6 @@ function ProductList() {
             .catch((error) => console.error('An error occurred:', error));
     }, []);
 
-
     // Group producrs by store
     const groupedProducts = products.reduce((acc, product) => {
         product.Stores.forEach((store) => {
@@ -25,14 +24,13 @@ function ProductList() {
             }
             acc[store.name].push({
                 ...product,
-                price: parseFloat(store.ProductStore.price.toFixed(2)),
-                ProductStore: store.ProductStore // include ProductStore in the new product object
+                storeId: store.id, // Include the store ID in the product object
+                price: parseFloat(store.ProductStore.price.toFixed(2))
             });
         });
         return acc;
     }, {});
-
-
+    
 
     return (
         <div>
@@ -46,10 +44,10 @@ function ProductList() {
                     <div className="products-row">
                         {groupedProducts[storeName].map((product) => (
                             <div key={product.id} className="product-item">
-                                <img src={product.ProductStore.imagePath ? `http://localhost:5000/${storeName}/${product.ProductStore.imagePath}` : `http://localhost:5000/uploads/image-1691134764415.png`} alt={product.name} />
+                                <img src={product.Stores[0].ProductStore.imagePath ? `http://localhost:5000/${product.Stores[0].ProductStore.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.name} />
                                 <h3>{product.name}</h3>
                                 <p>Price: ${product.price.toFixed(2)}</p>
-                                <Link to={`/stores/${product.ProductStore.StoreId}/product/${product.id}`}>View details</Link>
+                                <Link to={`/stores/${product.storeId}/product/${product.id}`}>View details</Link>
                             </div>
                         ))}
                     </div>
@@ -57,8 +55,6 @@ function ProductList() {
             ))}
         </div>
     );
-
-
 }
 
 export default ProductList;

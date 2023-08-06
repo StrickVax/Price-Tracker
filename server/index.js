@@ -20,7 +20,8 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
@@ -94,29 +95,38 @@ app.get('/products', async (req, res) => {
 
 
 // Gets a single product from the database
-app.get('/stores/:storeId/products/:productId', async (req, res) => {
+app.get('/product/:productId/store/:storeId/productStore', async (req, res) => {
+    const { productId, storeId } = req.params;
+
     try {
-        const { storeId, productId } = req.params;
-        const product = await Product.findByPk(productId, {
-            include: [{
-                model: Store,
-                where: { id: storeId },
-                through: {
-                    attributes: ['price'] // Include the price from the join table
+        const productStore = await ProductStore.findAll({
+            where: {
+                ProductId: productId,
+                StoreId: storeId
+            },
+            include: [
+                {
+                    model: Product,
+                    where: { id: productId }
+                },
+                {
+                    model: Store,
+                    where: { id: storeId }
                 }
-            }]
+            ]
         });
 
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found in store' });
+        if (productStore && productStore.length > 0) {
+            return res.status(200).json(productStore[0]);
+        } else {
+            return res.status(404).json({ message: "Not Found" });
         }
-
-        res.json(product);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
 
 // Sends the data to the frontend
 app.post('/products', upload.single('image'), async (req, res) => {
