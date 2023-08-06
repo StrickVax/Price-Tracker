@@ -42,7 +42,7 @@ function ProductList() {
                             <div key={product.id} className="product-item">
                                 <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/image-1691134764415.png`} alt={product.name} />
                                 <h3>{product.name}</h3>
-                                <p>Price: {product.price.toFixed(2)}</p>
+                                <p>Price: ${product.price.toFixed(2)}</p>
                                 <Link to={`/product/${product.id}`}>View Details</Link>
                             </div>
                         ))}

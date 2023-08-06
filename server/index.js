@@ -85,6 +85,35 @@ app.get('/products', async (req, res) => {
     }
 });
 
+// Gets a single product from the database
+app.get('/product/:id', async (req, res) => {
+    try {
+        const id = req.params.id; // Get the id from the request parameters
+        const product = await Product.findOne({
+            where: {
+                id: id
+            },
+            include: {
+                model: Store,
+                through: {
+                    attributes: [] // Exclude the join table from the result
+                }
+            }
+        });
+
+        if (product) {
+            res.json(product);
+        } else {
+            // If no product was found, send a 404 response
+            res.status(404).json({ message: 'Product not found' });
+        }
+    } catch (err) {
+        console.error(err); // Log the entire error object
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 // Sends the data to the frontend
 app.post('/products', upload.single('image'), async (req, res) => {
     const transaction = await sequelize.transaction();
