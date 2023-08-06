@@ -25,12 +25,12 @@ function ProductList() {
             acc[store.name].push({
                 ...product,
                 storeId: store.id, // Include the store ID in the product object
-                price: parseFloat(store.ProductStore.price.toFixed(2))
+                // Somehow, an item with null price was added. This is to ensure loading regardless
+                price: store.ProductStore.price ? parseFloat(store.ProductStore.price.toFixed(2)) : 0
             });
         });
         return acc;
     }, {});
-    
 
     return (
         <div>

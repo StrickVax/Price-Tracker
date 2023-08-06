@@ -28,7 +28,7 @@ function ProductDetail() {
     };
 
     useEffect(() => {
-        fetch(`http://localhost:5000/stores/${storeId}/product/${id}`)
+        fetch(`http://localhost:5000/product/${id}/store/${storeId}/productStore`)
             .then((res) => {
                 if (!res.ok) {
                     throw new Error('Network response was not ok');
@@ -45,19 +45,19 @@ function ProductDetail() {
             });
     }, [id, storeId]);
 
-
     if (loading) {
         return <div>Loading...</div>;
     }
 
     return (
         <div>
-            <h1>{product.name}</h1>
-            <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/image-1691134764415.png`} alt={product.name} />
-            <p>Price: ${product.Stores[0].ProductStore.price.toFixed(2)}</p>
+            <h1>{product.Product.name}</h1>
+            <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.Product.name} />
+            <p>Price: ${product.price.toFixed(2)}</p>
             <h2>Other Store Prices</h2>
             {/* Iterate over other store prices here */}
             <h2>Price History</h2>
+            {/* TODO: Add the chart */}
             <h2>Edit Price</h2>
             <input type="number" value={newPrice} onChange={handlePriceChange} />
             <button onClick={handleUpdatePrice}>Update Price</button>
