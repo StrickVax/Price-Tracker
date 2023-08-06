@@ -23,10 +23,16 @@ function ProductList() {
             if (!acc[store.name]) {
                 acc[store.name] = [];
             }
-            acc[store.name].push({ ...product, price: parseFloat(product.price.toFixed(2)) });
+            acc[store.name].push({
+                ...product,
+                price: parseFloat(store.ProductStore.price.toFixed(2)),
+                ProductStore: store.ProductStore // include ProductStore in the new product object
+            });
         });
         return acc;
     }, {});
+
+
 
     return (
         <div>
@@ -40,10 +46,10 @@ function ProductList() {
                     <div className="products-row">
                         {groupedProducts[storeName].map((product) => (
                             <div key={product.id} className="product-item">
-                                <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/image-1691134764415.png`} alt={product.name} />
+                                <img src={product.ProductStore.imagePath ? `http://localhost:5000/${storeName}/${product.ProductStore.imagePath}` : `http://localhost:5000/uploads/image-1691134764415.png`} alt={product.name} />
                                 <h3>{product.name}</h3>
                                 <p>Price: ${product.price.toFixed(2)}</p>
-                                <Link to={`/product/${product.id}`}>View Details</Link>
+                                <Link to={`/stores/${product.ProductStore.StoreId}/product/${product.id}`}>View details</Link>
                             </div>
                         ))}
                     </div>
@@ -51,6 +57,7 @@ function ProductList() {
             ))}
         </div>
     );
+
 
 }
 

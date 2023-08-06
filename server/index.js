@@ -31,8 +31,6 @@ const upload = multer({ storage: storage });
 class Product extends Model { }
 Product.init({
     name: DataTypes.STRING,
-    price: DataTypes.FLOAT,
-    imagePath: DataTypes.STRING,
 }, {
     sequelize,
     modelName: 'Product'
@@ -46,19 +44,26 @@ Store.init({
     modelName: 'Store'
 });
 
-class ProductStore extends Model { }
-ProductStore.init({
-    price: DataTypes.FLOAT
-}, {
-    sequelize,
-    modelName: 'ProductStore'
+const ProductStore = sequelize.define('ProductStore', {
+    price: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
+    imagePath: {
+        type: DataTypes.STRING
+    }
 });
 
 
+// Allow us to have multiple entries for the same product-store relationship, but with different prices.
 Product.belongsToMany(Store, { through: ProductStore });
 Store.belongsToMany(Product, { through: ProductStore });
 
+ProductStore.belongsTo(Product);
+ProductStore.belongsTo(Store);
+
 sequelize.sync();
+
 
 app.get('/', (req, res) => {
     res.send('Welcome to my Price Tracker API!');
@@ -76,7 +81,7 @@ app.get('/products', async (req, res) => {
             include: {
                 model: Store,
                 through: {
-                    attributes: [] // Exclude the join table from the result
+                    attributes: ['price', 'imagePath'] // Include price and imagePath
                 }
             }
         });
@@ -84,9 +89,9 @@ app.get('/products', async (req, res) => {
     } catch (err) {
         console.error(err); // Log the entire error object
         res.status(500).json({ error: err.message });
-
     }
 });
+
 
 // Gets a single product from the database
 app.get('/stores/:storeId/products/:productId', async (req, res) => {
@@ -113,8 +118,6 @@ app.get('/stores/:storeId/products/:productId', async (req, res) => {
     }
 });
 
-
-
 // Sends the data to the frontend
 app.post('/products', upload.single('image'), async (req, res) => {
     const transaction = await sequelize.transaction();
@@ -122,24 +125,39 @@ app.post('/products', upload.single('image'), async (req, res) => {
         const productData = JSON.parse(req.body.product);
         const storesData = JSON.parse(req.body.stores);
 
-
         if (req.file) {
             productData.imagePath = req.file.path; // Add the image path if the file exists
         }
 
         let product = await Product.findOne({ where: { name: productData.name } });
+
         if (!product) {
-            // If the product does not exist, create it
-            product = await Product.create(productData, { transaction });
+            // If the product does not exist, create it with just the name
+            product = await Product.create({ name: productData.name }, { transaction });
         }
-        // If the product exists, the existing product is used
 
-        const stores = storesData.map(storeName => ({ name: storeName }));
-        const storeRecords = await Store.bulkCreate(stores, { transaction, ignoreDuplicates: true });
+        for (const storeName of storesData) {
+            let storeRecord = await Store.findOne({ where: { name: storeName } });
 
-        // Add the stores to the product and specify the price
-        for (const storeRecord of storeRecords) {
-            await product.addStore(storeRecord, { through: { price: productData.price }, transaction });
+            if (!storeRecord) {
+                // If the store does not exist, create it
+                storeRecord = await Store.create({ name: storeName }, { transaction });
+            }
+
+            const [storeProduct, created] = await ProductStore.findOrCreate({
+                where: { ProductId: product.id, StoreId: storeRecord.id },
+                defaults: { price: productData.price, imagePath: req.file ? req.file.path : null },
+                transaction,
+            });
+
+            if (!created) {
+                // If the product exists in the store, update its price and imagePath
+                storeProduct.price = productData.price;
+                if (req.file) {
+                    storeProduct.imagePath = req.file.path;
+                }
+                await storeProduct.save({ transaction });
+            }
         }
 
         await transaction.commit();
@@ -148,11 +166,11 @@ app.post('/products', upload.single('image'), async (req, res) => {
         await transaction.rollback();
         console.error(err); // Log the entire error object
         res.status(500).json({ error: err.message });
-
     }
     console.log("Request body:", req.body);
-
 });
+
+
 
 // If the product already exists, and you want to update the price
 app.put('/stores/:storeId/products/:productId', async (req, res) => {
