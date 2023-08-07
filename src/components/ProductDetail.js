@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import { Line } from "react-chartjs-2";
 
 function ProductDetail() {
@@ -9,6 +10,7 @@ function ProductDetail() {
     const [chartData, setChartData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [prices, setPrices] = useState([]);
+    const [message, setMessage] = useState("");
 
 
     const handlePriceChange = (event) => {
@@ -31,8 +33,14 @@ function ProductDetail() {
                 return data;
             })
             .then((data) => {
-                setProduct(data);
-                setNewPrice(''); // Clear the input field
+                if (newPrice > 0) {
+
+                    setProduct(data);
+                    setMessage("Price updated successfully!");
+                    setNewPrice(''); // Clear the input field
+                } else {
+                    setMessage("Please provide a valid name and price.");
+                }
             })
             .catch((error) => console.error('Error:', error));
 
@@ -86,17 +94,23 @@ function ProductDetail() {
             <p>Price: ${product.price ? parseFloat(product.price.toFixed(2)) : 0}</p>
             <h2>Other Store Prices</h2>
             {
-                prices.map(price =>
-                    <div key={price.storeId}>
-                        <p>{price.storeName}: ${price.price.toFixed(2)}</p>
-                    </div>
-                )
+                prices
+                    .filter(price => price.storeId !== Number(storeId)) // exclude current store's price
+                    .map(price =>
+                        <div key={price.storeId}>
+                            <Link to={`/stores/${price.storeId}/product/${id}`}>
+                                <p>{price.storeName}: ${price.price.toFixed(2)}</p>
+                            </Link>
+                        </div>
+                    )
             }
+
             <h2>Price History</h2>
             {/* TODO: Add the chart */}
             <h2>Edit Price</h2>
             <input type="number" value={newPrice} onChange={handlePriceChange} />
             <button onClick={handleUpdatePrice}>Update Price</button>
+            {message && <p>{message}</p>}
         </div>
     );
 }
