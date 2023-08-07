@@ -21,10 +21,19 @@ function ProductDetail() {
         })
             .then((res) => res.json())
             .then((data) => {
-                // Update the product data in the state
+                if (!data.Product) {
+                    // Fetch the product data again if it was not in the response
+                    return fetch(`http://localhost:5000/product/${id}/store/${storeId}/productStore`)
+                        .then((res) => res.json());
+                }
+                return data;
+            })
+            .then((data) => {
                 setProduct(data);
                 setNewPrice(''); // Clear the input field
-            });
+            })
+            .catch((error) => console.error('Error:', error));
+
     };
 
     useEffect(() => {
@@ -53,7 +62,7 @@ function ProductDetail() {
         <div>
             <h1>{product.Product.name}</h1>
             <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.Product.name} />
-            <p>Price: ${product.price.toFixed(2)}</p>
+            <p>Price: ${product.price ? parseFloat(product.price.toFixed(2)) : 0}</p>
             <h2>Other Store Prices</h2>
             {/* Iterate over other store prices here */}
             <h2>Price History</h2>
