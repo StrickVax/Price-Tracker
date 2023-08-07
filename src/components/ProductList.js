@@ -25,12 +25,15 @@ function ProductList() {
             acc[store.name].push({
                 ...product,
                 storeId: store.id, // Include the store ID in the product object
-                // Somehow, an item with null price was added. This is to ensure loading regardless
-                price: store.ProductStore.price ? parseFloat(store.ProductStore.price.toFixed(2)) : 0
+                price: store.ProductStore.price ? parseFloat(store.ProductStore.price.toFixed(2)) : 0,
+                ProductStore: store.ProductStore, // include ProductStore in the object
             });
         });
         return acc;
     }, {});
+    
+
+    const storeOrder = ['Costco', 'WinCo', 'Walmart', 'El Super'];
 
     return (
         <div>
@@ -38,23 +41,27 @@ function ProductList() {
             <Link to="/add-product">
                 <button>Add Item</button>
             </Link>
-            {Object.keys(groupedProducts).map((storeName) => (
-                <div className="store-section" key={storeName}>
-                    <h2>{storeName}</h2>
-                    <div className="products-row">
-                        {groupedProducts[storeName].map((product) => (
-                            <div key={product.id} className="product-item">
-                                <img src={product.Stores[0].ProductStore.imagePath ? `http://localhost:5000/${product.Stores[0].ProductStore.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.name} />
-                                <h3>{product.name}</h3>
-                                <p>Price: ${product.price.toFixed(2)}</p>
-                                <Link to={`/stores/${product.storeId}/product/${product.id}`}>View details</Link>
-                            </div>
-                        ))}
+            {
+                Object.keys(groupedProducts).sort((a, b) => storeOrder.indexOf(a) - storeOrder.indexOf(b)).map((storeName) => (
+                    <div className="store-section" key={storeName}>
+                        <h2>{storeName}</h2>
+                        <div className="products-row">
+                            {groupedProducts[storeName].map((product) => (
+                                <div key={product.id} className="product-item">
+                                    <img src={product.ProductStore.imagePath ? `http://localhost:5000/${product.ProductStore.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.name} />
+                                    <h3>{product.name}</h3>
+                                    <p>Price: ${product.price.toFixed(2)}</p>
+                                    <Link to={`/stores/${product.storeId}/product/${product.id}`}>View details</Link>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))
+            }
         </div>
     );
+
+
 }
 
 export default ProductList;
