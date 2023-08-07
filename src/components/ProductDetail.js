@@ -8,6 +8,8 @@ function ProductDetail() {
     const [newPrice, setNewPrice] = useState('');
     const [chartData, setChartData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [prices, setPrices] = useState([]);
+
 
     const handlePriceChange = (event) => {
         setNewPrice(event.target.value);
@@ -54,6 +56,25 @@ function ProductDetail() {
             });
     }, [id, storeId]);
 
+    useEffect(() => {
+        if (product) {
+            fetch(`http://localhost:5000/products/${id}/prices`)
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    setPrices(data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+    }, [id, product]);
+
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -64,7 +85,13 @@ function ProductDetail() {
             <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.Product.name} />
             <p>Price: ${product.price ? parseFloat(product.price.toFixed(2)) : 0}</p>
             <h2>Other Store Prices</h2>
-            {/* Iterate over other store prices here */}
+            {
+                prices.map(price =>
+                    <div key={price.storeId}>
+                        <p>{price.storeName}: ${price.price.toFixed(2)}</p>
+                    </div>
+                )
+            }
             <h2>Price History</h2>
             {/* TODO: Add the chart */}
             <h2>Edit Price</h2>

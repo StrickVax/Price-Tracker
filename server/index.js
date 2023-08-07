@@ -180,6 +180,30 @@ app.post('/products', upload.single('image'), async (req, res) => {
     console.log("Request body:", req.body);
 });
 
+// Gets the prices of a product from all stores
+app.get('/products/:productId/prices', async (req, res) => {
+    const { productId } = req.params;
+
+    try {
+        const productStores = await ProductStore.findAll({
+            where: { ProductId: productId },
+            include: Store
+        });
+
+        if (productStores) {
+            return res.status(200).json(productStores.map(ps => ({
+                storeId: ps.Store.id,
+                storeName: ps.Store.name,
+                price: ps.price
+            })));
+        } else {
+            return res.status(404).json({ message: "Not Found" });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
 
 
 // If the product already exists, and you want to update the price
