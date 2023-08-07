@@ -37,21 +37,21 @@ function ProductList() {
 
     return (
         <div>
-            <h1>Product List</h1>
+            <h1 className="product-list__header">Product List</h1>
             <Link to="/add-product">
-                <button>Add Item</button>
+                <button className="product-list__button">Add Item</button>
             </Link>
             {
                 Object.keys(groupedProducts).sort((a, b) => storeOrder.indexOf(a) - storeOrder.indexOf(b)).map((storeName) => (
-                    <div className="store-section" key={storeName}>
-                        <h2>{storeName}</h2>
-                        <div className="products-row">
+                    <div className="product-list__section" key={storeName}>
+                        <h2 className="product-list__header-secondary">{storeName}</h2>
+                        <div className="product-list__row">
                             {groupedProducts[storeName].map((product) => (
-                                <div key={product.id} className="product-item">
-                                    <img src={product.ProductStore.imagePath ? `http://localhost:5000/${product.ProductStore.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.name} />
+                                <div key={product.id} className="product-list__item">
+                                    <img src={product.ProductStore.imagePath ? `http://localhost:5000/${product.ProductStore.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.name} className="product-list__image" />
                                     <h3>{product.name}</h3>
                                     <p>Price: ${product.price.toFixed(2)}</p>
-                                    <Link to={`/stores/${product.storeId}/product/${product.id}`}>View details</Link>
+                                    <Link to={`/stores/${product.storeId}/product/${product.id}`} className="product-list__link">View details</Link>
                                 </div>
                             ))}
                         </div>
@@ -60,6 +60,7 @@ function ProductList() {
             }
         </div>
     );
+
 
 
 }

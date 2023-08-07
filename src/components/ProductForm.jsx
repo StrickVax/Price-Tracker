@@ -112,14 +112,14 @@ function ProductForm() {
     // Frontend display
     return (
         <form onSubmit={handleSubmit} className="product-form">
-            <label>
-
+            <label className="product-form__label">
                 Name:
                 <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    className="product-form__input"
                 />
                 <div>
                     {Array.isArray(suggestions) && suggestions.map((suggestion) => (
@@ -132,29 +132,30 @@ function ProductForm() {
                     ))}
                 </div>
             </label>
-            <label>
+            <label className="product-form__label">
                 Price:
-                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min="0.01" step="0.01" />
+                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min="0.01" step="0.01" className="product-form__input" />
             </label>
-            <label>
+            <label className="product-form__label">
                 Stores:
-                <select multiple onChange={handleStoreChange}>
+                <select multiple onChange={handleStoreChange} className="product-form__select">
                     {storeOptions.map(store => (
                         <option key={store} value={store}>{store}</option>
                     ))}
                 </select>
             </label>
-            <label>
+            <label className="product-form__label">
                 Image:
                 <input type="file" accept="image/png, image/jpeg" onChange={handleImageChange} />
                 {imagePreview && (
                     <img src={imagePreview} alt="Image Preview" style={{ width: '100px' }} />
                 )}
             </label>
-            <button type="submit">Add Product</button>
-            {message && <p>{message}</p>}
+            <button type="submit" className="product-form__button">Add Product</button>
+            {message && <p className="product-form__message">{message}</p>}
         </form>
     );
+
 }
 
 export default ProductForm;

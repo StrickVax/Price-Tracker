@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import { Line } from "react-chartjs-2";
+import '../assets/ProductDetail.css';
+
 
 function ProductDetail() {
     const { id, storeId } = useParams();
@@ -88,31 +90,34 @@ function ProductDetail() {
     }
 
     return (
-        <div>
-            <h1>{product.Product.name}</h1>
-            <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.Product.name} />
-            <p>Price: ${product.price ? parseFloat(product.price.toFixed(2)) : 0}</p>
-            <h2>Other Store Prices</h2>
-            {
-                prices
-                    .filter(price => price.storeId !== Number(storeId)) // exclude current store's price
-                    .map(price =>
-                        <div key={price.storeId}>
-                            <Link to={`/stores/${price.storeId}/product/${id}`}>
-                                <p>{price.storeName}: ${price.price.toFixed(2)}</p>
-                            </Link>
-                        </div>
-                    )
-            }
-
-            <h2>Price History</h2>
+        <div className="product-details__container">
+            <h1 className="product-details__header">{product.Product.name}</h1>
+            <img src={product.imagePath ? `http://localhost:5000/${product.imagePath}` : `http://localhost:5000/uploads/placeholder.png`} alt={product.Product.name} className="product-details__image" />
+            <p className="product-details__description">Price: ${product.price ? parseFloat(product.price.toFixed(2)) : 0}</p>
+            <h2 className="product-details__header-secondary">Other Store Prices</h2>
+            <div className="product-details__price-list">
+                {
+                    prices
+                        .filter(price => price.storeId !== Number(storeId)) // exclude current store's price
+                        .map(price =>
+                            <div key={price.storeId}>
+                                <Link to={`/stores/${price.storeId}/product/${id}`}>
+                                    <p>{price.storeName}: ${price.price.toFixed(2)}</p>
+                                </Link>
+                            </div>
+                        )
+                }
+            </div>
+            <h2 className="product-details__header-secondary">Price History</h2>
             {/* TODO: Add the chart */}
-            <h2>Edit Price</h2>
-            <input type="number" value={newPrice} onChange={handlePriceChange} />
-            <button onClick={handleUpdatePrice}>Update Price</button>
+            <h2 className="product-details__header-secondary">Edit Price</h2>
+            <input type="number" value={newPrice} onChange={handlePriceChange} className="product-details__input" />
+            <button onClick={handleUpdatePrice} className="product-details__button">Update Price</button>
             {message && <p>{message}</p>}
         </div>
     );
+    
+
 }
 
 export default ProductDetail;

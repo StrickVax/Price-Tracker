@@ -7,23 +7,23 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.product-form label {
+.product-form__label {
     display: block;
     margin-bottom: 10px;
 }
 
-.product-form input,
-.product-form select {
+.product-form__input,
+.product-form__select {
     width: 100%;
     padding: 5px;
     margin-bottom: 20px;
 }
 
-.product-form button {
+.product-form__button {
     padding: 5px 10px;
     cursor: pointer;
 }
 
-.product-form p {
+.product-form__message {
     color: red;
 }
