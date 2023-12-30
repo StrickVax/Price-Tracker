@@ -10,6 +10,7 @@ To get started with this project:
 2. Install dependencies in both the root directories with `npm install`.
 3. Make sure you have SQLite installed locally, or configure the connection in `server/database.js` to point to a SQLite instance.
 4. In the `root` directory, start the server with `npm start`.
+5. In the `server` directory, start the backend with `node .\index.js`
 
 ## File Structure
 
@@ -43,13 +44,13 @@ The `src` directory contains the React frontend application.
 - View product details with images, price and store availability.
 - See an image preview when adding or updating a product.
 - Automatic price conversion and formatting.
+- Duplicate product detection based on product name.
+- Comparisons between different products.
 
 ## Future Features
 
-- Duplicate product detection based on product name.
 - User authentication and authorization.
 - More detailed product information.
-- Comparisons between different products.
 - Integration with real store data.
 
 ## Contributing
